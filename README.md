@@ -1,4 +1,4 @@
-📊 ETL Automático: Estados de Cuenta BBVA
+📊 ETL Automático: Estados de Cuenta BBVA TDC
 
 Un pipeline de datos (ETL) construido en Python para extraer, transformar y consolidar movimientos financieros desde estados de cuenta en PDF (BBVA México).
 
@@ -10,8 +10,6 @@ Transformación Inteligente: Clasifica Compras a Meses Sin Intereses (MSI), pago
 
 Interfaz Gráfica (GUI): Selección de archivos y captura segura del RFC mediante tkinter.
 
-Seguridad: Integración con .env para gestionar contraseñas localmente sin exponer datos sensibles.
-
 🛠️ Tecnologías Usadas
 
 Python 3.x
@@ -22,16 +20,14 @@ pdfplumber - Extracción de texto desde PDFs complejos.
 
 re (RegEx) - Búsqueda de patrones financieros.
 
-python-dotenv - Manejo seguro de variables de entorno.
-
 ⚙️ Instalación y Uso
 
 Clonar el repositorio y crear el entorno virtual:
 
-git clone https://github.com/bernardogaona101/account_status.git
-cd account_status
+git clone https://github.com/bernardogaona101/bbva-tdc-account-status.git
+cd bbva-tdc-account-status
 python -m venv venv
-# Activar entorno: venv\Scripts\activate (Windows) o source venv/bin/activate (Mac/Linux)
+# Activar entorno: venv\Scripwts\activate (Windows) o source venv/bin/activate (Mac/Linux)s
 
 
 Instalar dependencias:
