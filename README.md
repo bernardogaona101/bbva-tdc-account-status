@@ -28,8 +28,8 @@ python-dotenv - Manejo seguro de variables de entorno.
 
 Clonar el repositorio y crear el entorno virtual:
 
-git clone https://github.com/TU_USUARIO/etl-bbva-tdc.git
-cd etl-bbva-tdc
+git clone https://github.com/bernardogaona101/account_status.git
+cd account_status
 python -m venv venv
 # Activar entorno: venv\Scripts\activate (Windows) o source venv/bin/activate (Mac/Linux)
 
