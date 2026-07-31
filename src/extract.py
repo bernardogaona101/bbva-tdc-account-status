@@ -7,7 +7,6 @@ from src.utils import clean_global_date
 def get_metadata_pdf(pdf_path, password):
     clabe = "CLABE_Unknown"
     fecha_corte = "Date_Unknown"
-    year_detected = "No_year"
     
     print("Analizing metadata...")
     
@@ -28,7 +27,7 @@ def get_metadata_pdf(pdf_path, password):
                     fecha_corte = match_fecha.group(1)
                     fecha_corte = clean_global_date(fecha_corte)
                     if fecha_corte:
-                        year_detected = fecha_corte.split('-')[0]
+
                         print(f"Fecha de corte: {fecha_corte}")
                 
                 if clabe != "CLABE_Unknown" and fecha_corte != "Date_Unknown":
@@ -36,7 +35,7 @@ def get_metadata_pdf(pdf_path, password):
     except Exception as e:
         print(f"Metadata cannot be read: {e}")
         
-    return clabe, fecha_corte, year_detected
+    return clabe, fecha_corte
 
 # function to extract msi records
 def extract_msi_rec(pdf_path, pdf_password):

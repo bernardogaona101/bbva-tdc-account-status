@@ -9,3 +9,5 @@ env/
 notebooks
 .DS_Store
 Thumbs.db
+google_credentials.json
+Notebooks/

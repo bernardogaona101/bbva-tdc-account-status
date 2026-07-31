@@ -7,7 +7,7 @@ from tkinter import filedialog, messagebox, simpledialog
 import sys
 from src.extract import extract_msi_rec, extract_regular_rec, get_metadata_pdf
 from src.transform import consolidate_movements, clean_and_categorize
-from src.load import save_csv
+from src.load import load_data
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,7 +34,7 @@ def execute_etl():
     pdf_path, PDF_PASSWORD = get_user_data()    
     # EXTRACT
     print("\n[1/3] extract data...")
-    clabe, fecha, anio = get_metadata_pdf(pdf_path, PDF_PASSWORD)
+    clabe, fecha = get_metadata_pdf(pdf_path, PDF_PASSWORD)
     df_msi = extract_msi_rec(pdf_path, PDF_PASSWORD)
     df_regular = extract_regular_rec(pdf_path, PDF_PASSWORD)
     
@@ -45,13 +45,13 @@ def execute_etl():
     df_raw = consolidate_movements(df_msi, df_regular)
     
     # categorize and clean
-    df_clean = clean_and_categorize(df_raw)
+    df_clean = clean_and_categorize(df_raw, fecha)
     
     # LOAD
     print("\n[3/3] Load data...")
     # fecha de corte to file
     # file_name = f'movimientos_bbva_{fecha}.csv'
-    save_csv(df_clean)
+    load_data(df_clean, clabe, fecha)
     
     print("\n--- ETL PROCESS COMPLETE ---")
 

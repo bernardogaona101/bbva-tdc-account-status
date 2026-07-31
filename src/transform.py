@@ -44,7 +44,7 @@ def consolidate_movements(df_msi, df_regular):
     return df_consolidate
 
 # function to clean and validate records
-def clean_and_categorize(df_total):
+def clean_and_categorize(df_total, fecha_corte):
     # cleaning  dates
     df_total['Fecha_Operacion'] = df_total['Fecha_Operacion'].apply(clean_global_date)
     df_total['Fecha_Cargo'] = df_total['Fecha_Cargo'].apply(clean_global_date)
@@ -73,5 +73,7 @@ def clean_and_categorize(df_total):
     )
 
     df_total.loc[is_total_charge, 'Tipo_Movimiento'] = 'Compra Total MSI'
+
+    df_total['Fecha_Corte'] = fecha_corte
 
     return df_total
