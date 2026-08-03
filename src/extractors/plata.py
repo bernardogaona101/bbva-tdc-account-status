@@ -133,7 +133,7 @@ def extract_regular_rec(pages_text):
     
     all_text = "\n".join(pages_text)
             
-    print(all_text)
+    # print(all_text)
 
     clean_block = ""
     in_table = False
