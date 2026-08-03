@@ -9,8 +9,14 @@ from src.load import load_data
 from src.config import DEFAULT_GOOGLE_SHEET_NAME
 
 # Cargar contraseña oculta desde el archivo .env
+
 load_dotenv()
-env_password = os.getenv("RFC_BBVA")
+try:
+    # Intenta leerlo de la nube (Streamlit Cloud)
+    env_password = st.secrets["RFC_BBVA"]
+except:
+    # Si falla, intenta leerlo de tu computadora local (.env)
+    env_password = os.getenv("RFC_BBVA", "")
 
 # 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(page_title="Analizador Financiero", page_icon="📊", layout="centered")
@@ -53,8 +59,18 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 df_raw = consolidate_movements(df_msi, df_regular)
                 # categorize and clean
                 df_clean = clean_and_categorize(bank,df_raw, fecha)
-                
+              
+            cuenta_autorizada = ""
+                try:
+                    cuenta_autorizada = st.secrets.get("MI_CLABE", "")
+                except:
+                    pass
+                if save_cloud and cuenta_autorizada != "":
+                    if clabe != cuenta_autorizada:
+                        st.warning("🛡️ Por seguridad, la subida a Google Sheets ha sido desactivada porque el PDF no pertenece a la cuenta administradora. Solo podrás descargar el CSV.")
+                        save_cloud = False # Forzamos a apagar la nube para este intruso
                 # --- FASE 3: LOAD ---
+              
                 if not save_local and not save_cloud:
                     st.info("ℹ️ Datos extraídos correctamente, pero elegiste no guardarlos.")
                 else:
