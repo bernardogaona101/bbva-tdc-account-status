@@ -10,7 +10,7 @@ from src.config import DEFAULT_GOOGLE_SHEET_NAME
 
 # Cargar contraseña oculta desde el archivo .env
 load_dotenv()
-env_password = os.getenv("RFC_BBVA", "")
+env_password = os.getenv("RFC_BBVA")
 
 # 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(page_title="Analizador Financiero", page_icon="📊", layout="centered")
@@ -46,7 +46,7 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
             password_final = user_password if user_password != "" else env_password
             # --- FASE 1: EXTRACT ---
             # Nota: Streamlit entrega un objeto en memoria, pdfplumber lo lee sin problema
-            bank,clabe, fecha, df_msi, df_regular = detect_bank_and_extract(pdf_file, user_password)
+            bank,clabe, fecha, df_msi, df_regular = detect_bank_and_extract(pdf_file, password_final)
             
             if df_regular is not None or df_msi is not None:
                 # --- FASE 2: TRANSFORM ---
