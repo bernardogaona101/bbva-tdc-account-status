@@ -59,7 +59,6 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 df_raw = consolidate_movements(df_msi, df_regular)
                 # categorize and clean
                 df_clean = clean_and_categorize(bank,df_raw, fecha)
-              
             
                 # --- FASE 3: LOAD ---
                 cuenta_autorizada = ""
@@ -74,16 +73,15 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 if not save_local and not save_cloud:
                     st.info("ℹ️ Datos extraídos correctamente, pero elegiste no guardarlos.")
                 else:
-                     load_data(
+                    load_data(
                         df_clean,
                         clabe,
                         fecha,
                         google_sheet=DEFAULT_GOOGLE_SHEET_NAME,
                         save_local=save_local,
                         save_cloud=save_cloud
-                     )
-                st.success("✅ ¡Proceso completado exitosamente!")
-                
+                    )
+                    st.success("✅ ¡Proceso completado exitosamente!")               
                 # Mostrar las tablas limpias en la pantalla
                 if not df_clean.empty:
                     st.subheader("Movimientos del Periodo")
