@@ -30,9 +30,9 @@ user_password = st.text_input("Contraseña (RFC) - Déjalo en blanco si No se ne
 st.subheader("Opciones de Guardado")
 col1, col2 = st.columns(2)
 with col1:
-    save_local = st.checkbox("Guardar copia local (CSV)", value=True)
+    save_local = st.checkbox("Guardar copia local (CSV)", value=False)
 with col2:
-    save_cloud = st.checkbox("Subir a Nube", value=True)
+    save_cloud = st.checkbox("Subir a Nube", value=False)
 
 
 # 3. ORQUESTADOR ETL (Se ejecuta al presionar el botón)
@@ -72,6 +72,14 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 if not df_clean.empty:
                     st.subheader("Movimientos del Periodo")
                     st.dataframe(df_clean)
+                    # Convertimos el DataFrame a CSV en la memoria
+                    csv = df_clean.to_csv(index=False, encoding='utf-8-sig').encode('utf-8-sig')
                     
+                    st.download_button(
+                        label="⬇️ Descargar copia en Excel (CSV)",
+                        data=csv,
+                        file_name=f"{bank}_{clabe}_{fecha}_movimientos.csv",
+                        mime="text/csv"
+                    )
             else:
                 st.error("❌ No se detectó un banco válido o no se encontraron movimientos.")
