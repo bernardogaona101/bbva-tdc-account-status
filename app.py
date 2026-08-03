@@ -24,7 +24,6 @@ pdf_file = st.file_uploader("Selecciona tu PDF", type=["pdf"])
 
 # Contraseña (con valor por defecto del .env)
 user_password = st.text_input("Contraseña (RFC) - Déjalo en blanco si No se necesita:", 
-                              value=env_password, 
                               type="password")
 
 # Preferencias de guardado
@@ -42,7 +41,9 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
         st.warning("⚠️ Por favor, sube un archivo PDF primero.")
     else:
         with st.spinner("Analizando y extrayendo datos..."):
-            
+
+
+            password_final = user_password if user_password != "" else env_password
             # --- FASE 1: EXTRACT ---
             # Nota: Streamlit entrega un objeto en memoria, pdfplumber lo lee sin problema
             bank,clabe, fecha, df_msi, df_regular = detect_bank_and_extract(pdf_file, user_password)
