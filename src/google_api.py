@@ -1,6 +1,5 @@
 import gspread
 import os
-from src.config import GOOGLE_CREDENTIALS_PATH
 
 def save_to_google_sheets(df, nombre_documento="Master"):
     """
@@ -10,16 +9,29 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     print("\nIniciando conexión con Google Sheets...")
     
     # Definir la ruta de tus credenciales
-    # Asegúrate de que el archivo .json esté en la raíz de tu proyecto
-    # ruta_json = 'google_credentials.json'
+    try:
+        if "GOOGLE_CREDENTIALS" in st.secrets:
+            # Si estamos en Streamlit Cloud, cargamos el JSON desde los secretos
+            cred_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+            cuenta_servicio = gspread.service_account_from_dict(cred_dict)
+        else:
+            # Si estamos en tu computadora local, usamos el archivo fisico
+            from src.config import GOOGLE_CREDENTIALS_PATH
+            cuenta_servicio = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
     
     if not os.path.exists(GOOGLE_CREDENTIALS_PATH):
         print(f"Error: No se encontró el archivo de credenciales '{GOOGLE_CREDENTIALS_PATH}'.")
         return
         
     try:
-        # Autenticarse con Google
-        cuenta_servicio = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
+        if "GOOGLE_CREDENTIALS" in st.secrets:
+            # Si estamos en Streamlit Cloud, cargamos el JSON desde los secretos
+            cred_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+            cuenta_servicio = gspread.service_account_from_dict(cred_dict)
+        else:
+            # Si estamos en tu computadora local, usamos el archivo fisico
+            from src.config import GOOGLE_CREDENTIALS_PATH
+            cuenta_servicio = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
         
         # Abrir el documento por su nombre (el que compartiste con el robot)
         hoja_maestra = cuenta_servicio.open(nombre_documento)
