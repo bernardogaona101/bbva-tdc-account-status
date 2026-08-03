@@ -18,7 +18,7 @@ def consolidate_movements(df_msi, df_regular):
         df_msi_final['Descripcion'] = df_msi_final['Descripcion'] + " [MSI " + df_msi_final['Num_Pago'] + "]"
         
         # label type
-        df_msi_final['Tipo_Movimiento'] = 'MSI'
+        df_msi_final['Tipo_Movimiento'] = 'MSI Actual'
         
         # select columns
         df_msi_final = df_msi_final[['Fecha_Operacion', 'Fecha_Cargo', 'Descripcion', 'Monto', 'Tipo_Movimiento']]
@@ -44,7 +44,7 @@ def consolidate_movements(df_msi, df_regular):
     return df_consolidate
 
 # function to clean and validate records
-def clean_and_categorize(df_total, fecha_corte):
+def clean_and_categorize(bank, df_total, fecha_corte):
     # cleaning  dates
     df_total['Fecha_Operacion'] = df_total['Fecha_Operacion'].apply(clean_global_date)
     df_total['Fecha_Cargo'] = df_total['Fecha_Cargo'].apply(clean_global_date)
@@ -58,11 +58,12 @@ def clean_and_categorize(df_total, fecha_corte):
     df_total = df_total.loc[df_total['Monto']>0]
 
     # drop duplicates of msi records
-    drop_condition = (
+    msi_condition = (
         (df_total['Tipo_Movimiento'] == 'REGULAR') & 
         (df_total['Descripcion'].str.contains(r'\d{1,2}\s+DE+\s+\d{1,2}\b', regex=True, case=False, na=False))
     )
-    df_total = df_total[~drop_condition]
+    # df_total = df_total[~msi_condition]
+    df_total.loc[msi_condition,'Tipo_Movimiento'] = 'MSI'
 
     # categorize MSI, MSI TOTAL & REGULAR
     msi_total_pattern = r'A \d{2} MESES|A\s+MESES|\d{1,2}\s+MESES\s+S/I|A \d{1,2}\s+MSI'
@@ -75,5 +76,7 @@ def clean_and_categorize(df_total, fecha_corte):
     df_total.loc[is_total_charge, 'Tipo_Movimiento'] = 'Compra Total MSI'
 
     df_total['Fecha_Corte'] = fecha_corte
+    
+    df_total['bank'] = bank
 
     return df_total

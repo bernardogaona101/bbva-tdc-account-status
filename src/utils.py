@@ -27,7 +27,7 @@ def clean_global_date(date_str):
         current_year = datetime.now().year
 
         if len(p) == 3: return f"{p[2]}-{Months.get(p[1].lower(),'00')}-{p[0]}"
-        if len(p) == 2: return f"{current_year}-{Months.get(p[1].lower(),'00')}-{p[0]}"
+        # if len(p) == 2: return f"{current_year}-{Months.get(p[1].lower(),'00')}-{p[0]}"
 
         return None
     

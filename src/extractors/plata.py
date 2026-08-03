@@ -133,7 +133,7 @@ def extract_regular_rec(pdf_path):
     pattern_plata = re.compile(
         r'(\d{2}-[a-z]{3}-\d{4})\s+'     # 1. Fecha operación
         r'(\d{2}-[a-z]{3}-\d{4})\s+'     # 2. Fecha cargo
-        r'(\d{6}[X\*]+\d{4})\s+'         # 3. Tarjeta
+        r'(\d{6}[X\*]+\d{4}|\d{4})\s+'         # 3. Tarjeta
         r'(.*?)\s+'                      # 4. Descripción
         r'([+\-−]\s*[\d,]+\.\d{2})\s+'     # 5. Monto original
         r'([A-Z]{3})\s+'                 # 6. Moneda
@@ -150,6 +150,7 @@ def extract_regular_rec(pdf_path):
             # validate pages are readable
             all_text += (page.extract_text() or "") + "\n"
             
+    # print(all_text)
 
     clean_block = ""
     in_table = False

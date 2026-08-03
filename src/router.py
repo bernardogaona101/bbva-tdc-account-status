@@ -31,13 +31,13 @@ def detect_bank_and_extract(pdf_path, pdf_password):
     if bank == "BBVA":
         from src.extractors.bbva import extract_bbva
         clabe, fecha, df_msi, df_regular = extract_bbva(pdf_path, pdf_password)
-        return clabe, fecha, df_msi, df_regular
+        return bank, clabe, fecha, df_msi, df_regular
 
     elif bank == "PLATA":
         from src.extractors.plata import extract_plata
         clabe, fecha, df_msi, df_regular = extract_plata(pdf_path)
-        return clabe, fecha, df_msi, df_regular
+        return bank, clabe, fecha, df_msi, df_regular
 
     else:
         print("Bank no detected")
-        sys.exit()
+        return None
