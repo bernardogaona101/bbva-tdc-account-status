@@ -60,17 +60,17 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 # categorize and clean
                 df_clean = clean_and_categorize(bank,df_raw, fecha)
               
-            cuenta_autorizada = ""
+            
+                # --- FASE 3: LOAD ---
+                cuenta_autorizada = ""
                 try:
-                    cuenta_autorizada = st.secrets.get("MI_CLABE", "")
+                    cuenta_autorizada = st.secrets.get("MI_CLABE", [])
                 except:
                     pass
-                if save_cloud and cuenta_autorizada != "":
-                    if clabe != cuenta_autorizada:
+                if save_cloud and len(cuenta_autorizada) > 0:
+                    if clabe not in cuenta_autorizada:
                         st.warning("🛡️ Por seguridad, la subida a Google Sheets ha sido desactivada porque el PDF no pertenece a la cuenta administradora. Solo podrás descargar el CSV.")
-                        save_cloud = False # Forzamos a apagar la nube para este intruso
-                # --- FASE 3: LOAD ---
-              
+                        save_cloud = False
                 if not save_local and not save_cloud:
                     st.info("ℹ️ Datos extraídos correctamente, pero elegiste no guardarlos.")
                 else:
@@ -84,7 +84,7 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                      )
                 st.success("✅ ¡Proceso completado exitosamente!")
                 
-                # ¡Magia de Streamlit! Mostrar las tablas limpias en la pantalla
+                # Mostrar las tablas limpias en la pantalla
                 if not df_clean.empty:
                     st.subheader("Movimientos del Periodo")
                     st.dataframe(df_clean)
