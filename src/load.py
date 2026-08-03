@@ -24,20 +24,24 @@ def save_csv(df, clabe, fecha_corte):
     except Exception as e:
         print(f"Error al guardar el CSV: {e}")
 
-def load_data(df, clabe,fecha_corte, google_sheet="Master"):
+def load_data(df, clabe,fecha_corte, google_sheet="Master", save_local=True, save_cloud=True):
     """
     Función orquestadora de carga: Guarda localmente Y en la nube.
     Esta es la función que deberás llamar desde main.py
     """
-    #   Guardado Local
-    save_csv(df, clabe,fecha_corte)
+    if save_local:
+        #   Guardado Local
+        save_csv(df, clabe,fecha_corte)
+    else:
+        print("No saved to local")
 
-    #   Guardado en Nube
-    df_cloud = df.copy()
-    df_cloud['Fecha_Operacion'] = df_cloud['Fecha_Operacion'].astype(str)
-    df_cloud['Fecha_Cargo'] = df_cloud['Fecha_Cargo'].astype(str)
-    df_cloud['Fecha_Corte'] = df_cloud['Fecha_Corte'].astype(str)
-    df_cloud = df_cloud.fillna("")
-    
-   
-    save_to_google_sheets(df_cloud, google_sheet)
+    if save_cloud:
+        #   Guardado en Nube
+        df_cloud = df.copy()
+        df_cloud['Fecha_Operacion'] = df_cloud['Fecha_Operacion'].astype(str)
+        df_cloud['Fecha_Cargo'] = df_cloud['Fecha_Cargo'].astype(str)
+        df_cloud['Fecha_Corte'] = df_cloud['Fecha_Corte'].astype(str)
+        df_cloud = df_cloud.fillna("")
+        save_to_google_sheets(df_cloud, google_sheet)
+    else:
+        print("No saved to cloud")

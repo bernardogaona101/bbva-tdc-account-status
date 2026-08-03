@@ -38,10 +38,10 @@ def get_metadata_pdf(pdf_path):
     return clabe, fecha_corte
 
 # function to extract msi records
-def extract_msi_rec(pdf_path, pdf_password):
+def extract_msi_rec(pdf_path):
     # keywords to delimit search field
-    start_key = 'COMPRAS Y CARGOS DIFERIDOS A MESES'
-    end_key = 'ABONOS REGULARES'
+    start_key = 'Compras y cargos diferidos a meses'
+    end_key = 'Cargos, abonos y compras regulares'
     
 
     msi_record_pattern = re.compile(
@@ -58,7 +58,7 @@ def extract_msi_rec(pdf_path, pdf_password):
     records_found = []
     
     # Extract all text from pages
-    with pp.open(pdf_path, password=pdf_password) as pdf:
+    with pp.open(pdf_path) as pdf:
         all_text = ""
         for page in pdf.pages:
             all_text += (page.extract_text() or "") + "\n"
@@ -121,13 +121,13 @@ def extract_msi_rec(pdf_path, pdf_password):
         df_msi = pd.DataFrame(records_found)
         return df_msi
     else:
-        print("Block was found, but there were no records.")
+        print("No msi records detected.")
         return None
 
 # function to extract regular records
-def extract_regular_rec_plata(pdf_path, pdf_password):
+def extract_regular_rec(pdf_path):
     # keywords to delimit search field
-    start_key = 'Cargos, abonos y compras regulares'
+    start_key = 'abonos y compras regulares (no a meses)'
     end_key = 'Total cargos'
     
     pattern_plata = re.compile(
@@ -135,16 +135,16 @@ def extract_regular_rec_plata(pdf_path, pdf_password):
         r'(\d{2}-[a-z]{3}-\d{4})\s+'     # 2. Fecha cargo
         r'(\d{6}[X\*]+\d{4})\s+'         # 3. Tarjeta
         r'(.*?)\s+'                      # 4. Descripción
-        r'([+-]\s*[\d,]+\.\d{2})\s+'     # 5. Monto original
+        r'([+\-−]\s*[\d,]+\.\d{2})\s+'     # 5. Monto original
         r'([A-Z]{3})\s+'                 # 6. Moneda
         r'([\d\.]+)\s+'                  # 7. Tipo de cambio
-        r'([+-]\s*\$[\d,]+\.\d{2})',     # 8. Monto MXN final
+        r'([+\-−]\s*\$[\d,]+\.\d{2})',     # 8. Monto MXN final
         re.IGNORECASE | re.DOTALL
     )
     
     records_found = []
     
-    with pp.open(pdf_path, password=pdf_password) as pdf:
+    with pp.open(pdf_path) as pdf:
         all_text = ""
         for page in pdf.pages:
             # validate pages are readable
@@ -159,12 +159,12 @@ def extract_regular_rec_plata(pdf_path, pdf_password):
         clean_line = line.strip()
         
         # trigger delimiter if we found start key
-        if start_key.lower() in clean_line.lower() and not in_table:
+        if start_key in clean_line and not in_table:
             in_table = True
             continue # skip to the next line to not include title
             
         # end delimiter if we found end key
-        if end_key.lower() in clean_line.lower() and in_table:
+        if end_key in clean_line and in_table:
             in_table = False
             break 
             
@@ -187,7 +187,7 @@ def extract_regular_rec_plata(pdf_path, pdf_password):
         descripcion = re.sub(r'\s+', ' ', descripcion)
         
         # Tomamos el grupo 8 (Monto MXN final) limpiando símbolos y espacios
-        raw_amount = match.group(8).replace(' ', '').replace('$', '').replace(',', '')
+        raw_amount = match.group(8).replace(' ', '').replace('$', '').replace(',', '').replace('−', '-')
         amount = float(raw_amount)
         
         records_found.append({
@@ -203,3 +203,10 @@ def extract_regular_rec_plata(pdf_path, pdf_password):
     else:
         print("Regular records were not detected.")
         return None
+
+# apply the function into one
+def extract_plata(pdf_path):
+    clabe, fecha = get_metadata_pdf(pdf_path)
+    df_msi = extract_msi_rec(pdf_path)
+    df_regular = extract_regular_rec(pdf_path)
+    return clabe, fecha, df_msi, df_regular

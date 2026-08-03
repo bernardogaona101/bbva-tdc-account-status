@@ -195,3 +195,15 @@ def extract_regular_rec(pdf_path, pdf_password):
     else:
         print("Regular records were not detected.")
         return None
+
+# combine defs
+'''
+    use the definitions before to extract the tables 
+                from bbva credit card
+'''
+def extract_bbva(pdf_path, pdf_password):
+    clabe, fecha = get_metadata_pdf(pdf_path, pdf_password)
+    df_msi = extract_msi_rec(pdf_path, pdf_password)
+    df_regular = extract_regular_rec(pdf_path, pdf_password)
+    return clabe, fecha, df_msi, df_regular
+
