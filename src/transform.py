@@ -60,7 +60,7 @@ def clean_and_categorize(bank, df_total, fecha_corte):
     # drop duplicates of msi records
     msi_condition = (
         (df_total['Tipo_Movimiento'] == 'REGULAR') & 
-        (df_total['Descripcion'].str.contains(r'\d{1,2}\s+DE+\s+\d{1,2}\b', regex=True, case=False, na=False))
+        (df_total['Descripcion'].str.contains(r'\d{1,2}\s+DE\s+\d{1,2}\b', regex=True, case=False, na=False))
     )
     # df_total = df_total[~msi_condition]
     df_total.loc[msi_condition,'Tipo_Movimiento'] = 'MSI'

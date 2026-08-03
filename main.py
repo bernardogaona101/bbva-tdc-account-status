@@ -9,6 +9,7 @@ from src.gui import get_user_data, get_save_preferences
 from src.router import detect_bank_and_extract
 from src.transform import consolidate_movements, clean_and_categorize
 from src.load import load_data
+from src.config import DEFAULT_GOOGLE_SHEET_NAME
 
 def execute_etl():
     # get the input to start working: file_path and password (if necessary)
@@ -41,7 +42,7 @@ def execute_etl():
          df_clean,
          clabe,
          fecha,
-         google_sheet="Master",
+         google_sheet=DEFAULT_GOOGLE_SHEET_NAME,
          save_local=save_local,
          save_cloud=save_cloud
     )

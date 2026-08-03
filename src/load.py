@@ -1,9 +1,10 @@
 import os
 from src.google_api import save_to_google_sheets
+from src.config import BASE_ROOT_FILES
 # save data
 def save_csv(df, clabe, fecha_corte):
     # root
-    BASE_ROOT_FILES = os.path.join(os.path.expanduser("~"), "Estados_Cuenta_Analizados")
+    # BASE_ROOT_FILES = os.path.join(os.path.expanduser("~"), "Estados_Cuenta_Analizados")
     
     # Crear la carpeta si no existe
     if not os.path.exists(BASE_ROOT_FILES):

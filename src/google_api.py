@@ -1,5 +1,6 @@
 import gspread
 import os
+from src.config import GOOGLE_CREDENTIALS_PATH
 
 def save_to_google_sheets(df, nombre_documento="Master"):
     """
@@ -10,15 +11,15 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     
     # Definir la ruta de tus credenciales
     # Asegúrate de que el archivo .json esté en la raíz de tu proyecto
-    ruta_json = 'google_credentials.json'
+    # ruta_json = 'google_credentials.json'
     
-    if not os.path.exists(ruta_json):
-        print(f"Error: No se encontró el archivo de credenciales '{ruta_json}'.")
+    if not os.path.exists(GOOGLE_CREDENTIALS_PATH):
+        print(f"Error: No se encontró el archivo de credenciales '{GOOGLE_CREDENTIALS_PATH}'.")
         return
         
     try:
         # Autenticarse con Google
-        cuenta_servicio = gspread.service_account(filename=ruta_json)
+        cuenta_servicio = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
         
         # Abrir el documento por su nombre (el que compartiste con el robot)
         hoja_maestra = cuenta_servicio.open(nombre_documento)

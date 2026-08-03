@@ -4,41 +4,32 @@ import pandas as pd
 from src.utils import clean_global_date
 
 # function to obtain metadata
-def get_metadata_pdf(pdf_path):
+def get_metadata_pdf(pages_text):
     clabe = "CLABE_Unknown"
     fecha_corte = "Date_Unknown"
     
     print("Analizing metadata...")
-    
-    try:
-        with pp.open(pdf_path) as pdf:
-            for i in range(min(2, len(pdf.pages))):
-                text = pdf.pages[i].extract_text() or ""
-                
-                # search CLABE
-                match_clabe = re.search(r'Número de cuenta:[:\s]*(\d{10})', text)
-                if match_clabe and clabe == "CLABE_Unknown":
-                    clabe = match_clabe.group(1)
-                    print(f"Client detected (CLABE): {clabe}")
 
-                # search date
-                match_fecha = re.search(r'Fecha de corte[:\s]*(\d{2}-[a-z]{3}-\d{4})', text, re.IGNORECASE)
-                if match_fecha and fecha_corte == "Date_Unknown":
-                    fecha_corte = match_fecha.group(1)
-                    fecha_corte = clean_global_date(fecha_corte)
-                    if fecha_corte:
+    for text in pages_text[:2]:
+        match_clabe = re.search(r'Número de cuenta:[:\s]*(\d{10})', text)
+        if match_clabe and clabe == "CLABE_Unknown":
+            clabe = match_clabe.group(1)
+            print(f"Client detected (CLABE): {clabe}")
+        match_fecha = re.search(r'Fecha de corte[:\s]*(\d{2}-[a-z]{3}-\d{4})', text, re.IGNORECASE)
 
-                        print(f"Fecha de corte: {fecha_corte}")
-                
-                if clabe != "CLABE_Unknown" and fecha_corte != "Date_Unknown":
-                    break
-    except Exception as e:
-        print(f"Metadata cannot be read: {e}")
+        if match_fecha and fecha_corte == "Date_Unknown":
+            fecha_corte = match_fecha.group(1)
+            fecha_corte = clean_global_date(fecha_corte)
+            if fecha_corte:
+                print(f"Fecha de corte: {fecha_corte}")
         
-    return clabe, fecha_corte
+        if clabe != "CLABE_Unknown" and fecha_corte != "Date_Unknown":
+            break
+
+        return clabe, fecha_corte
 
 # function to extract msi records
-def extract_msi_rec(pdf_path):
+def extract_msi_rec(pages_text):
     # keywords to delimit search field
     start_key = 'Compras y cargos diferidos a meses'
     end_key = 'Cargos, abonos y compras regulares'
@@ -57,11 +48,7 @@ def extract_msi_rec(pdf_path):
     
     records_found = []
     
-    # Extract all text from pages
-    with pp.open(pdf_path) as pdf:
-        all_text = ""
-        for page in pdf.pages:
-            all_text += (page.extract_text() or "") + "\n"
+    all_text = "\n".join(pages_text)
             
     # delimit area
     clean_block = ""
@@ -125,7 +112,7 @@ def extract_msi_rec(pdf_path):
         return None
 
 # function to extract regular records
-def extract_regular_rec(pdf_path):
+def extract_regular_rec(pages_text):
     # keywords to delimit search field
     start_key = 'abonos y compras regulares (no a meses)'
     end_key = 'Total cargos'
@@ -144,13 +131,9 @@ def extract_regular_rec(pdf_path):
     
     records_found = []
     
-    with pp.open(pdf_path) as pdf:
-        all_text = ""
-        for page in pdf.pages:
-            # validate pages are readable
-            all_text += (page.extract_text() or "") + "\n"
+    all_text = "\n".join(pages_text)
             
-    # print(all_text)
+    print(all_text)
 
     clean_block = ""
     in_table = False
@@ -206,8 +189,8 @@ def extract_regular_rec(pdf_path):
         return None
 
 # apply the function into one
-def extract_plata(pdf_path):
-    clabe, fecha = get_metadata_pdf(pdf_path)
-    df_msi = extract_msi_rec(pdf_path)
-    df_regular = extract_regular_rec(pdf_path)
+def extract_plata(pages_text):
+    clabe, fecha = get_metadata_pdf(pages_text)
+    df_msi = extract_msi_rec(pages_text)
+    df_regular = extract_regular_rec(pages_text)
     return clabe, fecha, df_msi, df_regular
