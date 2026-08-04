@@ -3,7 +3,6 @@ import gspread
 import streamlit as st
 import json
 from src.config import BASE_ROOT_FILES, GOOGLE_CREDENTIALS_PATH
-import pandas as pd
 
 # save data
 def save_csv(df, clabe, fecha_corte):

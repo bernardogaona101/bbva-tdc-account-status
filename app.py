@@ -52,10 +52,13 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
             password_final = user_password if user_password != "" else env_password
             # --- FASE 1: EXTRACT ---
             # Nota: Streamlit entrega un objeto en memoria, pdfplumber lo lee sin problema
+            st.toast("Leyendo el PDF y detectando el banco...", icon="📄")
             bank,clabe, fecha, df_msi, df_regular = detect_bank_and_extract(pdf_file, password_final)
             
             if df_regular is not None or df_msi is not None:
+                st.toast(f"✅ ¡Datos extraídos de {bank}!", icon="✨")
                 # --- FASE 2: TRANSFORM ---
+                st.toast("🧹 Limpiando y categorizando movimientos...", icon="⚙️")
                 df_raw = consolidate_movements(df_msi, df_regular)
                 # categorize and clean
                 df_clean = clean_and_categorize(bank,df_raw, fecha)
@@ -70,6 +73,9 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                     if clabe not in cuenta_autorizada:
                         st.warning("🛡️ Por seguridad, la subida a Google Sheets ha sido desactivada porque el PDF no pertenece a la cuenta administradora. Solo podrás descargar el CSV.")
                         save_cloud = False
+
+                st.toast("💾 Preparando para guardar...", icon="📦")
+                
                 if not save_local and not save_cloud:
                     st.info("ℹ️ Datos extraídos correctamente, pero elegiste no guardarlos.")
                 else:
@@ -81,6 +87,7 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                         save_local=save_local,
                         save_cloud=save_cloud
                     )
+                    st.toast("🚀 ¡Datos guardados exitosamente!", icon="🎉")
                     st.success("✅ ¡Proceso completado exitosamente!")               
                 # Mostrar las tablas limpias en la pantalla
                 if not df_clean.empty:

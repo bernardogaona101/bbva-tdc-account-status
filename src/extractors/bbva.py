@@ -8,22 +8,22 @@ def get_metadata_pdf(pages_text):
     clabe = "CLABE_Unknown"
     fecha_corte = "Date_Unknown"
     
-    print("Analizing metadata...")
+    # print("Analizing metadata...")
 
     for text in pages_text[:2]:
         match_clabe = re.search(r'CLABE[:\s]*(\d{18})', text)
         if match_clabe and clabe == "CLABE_Unknown":
             clabe = match_clabe.group(1)
-            print(f"Client detected (CLABE): {clabe}")
+            # print(f"Client detected (CLABE): {clabe}")
 
         # search date
         match_fecha = re.search(r'Fecha de corte[:\s]*(\d{2}-[a-z]{3}-\d{4})', text, re.IGNORECASE)
         if match_fecha and fecha_corte == "Date_Unknown":
             fecha_corte = match_fecha.group(1)
             fecha_corte = clean_global_date(fecha_corte)
-            if fecha_corte:
+            # if fecha_corte:
 
-                print(f"Fecha de corte: {fecha_corte}")
+            #     print(f"Fecha de corte: {fecha_corte}")
         
         if clabe != "CLABE_Unknown" and fecha_corte != "Date_Unknown":
             break
@@ -110,7 +110,7 @@ def extract_msi_rec(pages_text):
         df_msi = pd.DataFrame(records_found)
         return df_msi
     else:
-        print("Block was found, but there were no records.")
+        # print("Block was found, but there were no records.")
         return None
 
 # function to extract regular records
@@ -178,7 +178,7 @@ def extract_regular_rec(pages_text):
     if records_found:
         return pd.DataFrame(records_found)
     else:
-        print("Regular records were not detected.")
+        # print("Regular records were not detected.")
         return None
 
 # combine defs
