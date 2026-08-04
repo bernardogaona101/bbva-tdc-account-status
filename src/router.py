@@ -27,7 +27,7 @@ def detect_bank_and_extract(pdf_path, pdf_password):
     pages_text = extract_pdf_text(pdf_path, pdf_password)
     
     if not pages_text:
-        return None, None, None, None
+        return None, None, None, None, None
 
     bank = "Unknown"
 
@@ -60,4 +60,4 @@ def detect_bank_and_extract(pdf_path, pdf_password):
         return bank, clabe, fecha, df_msi, df_regular
     else:
         print("Bank no detected")
-        return None, None, None, None
+        return None, None, None, None, None 
