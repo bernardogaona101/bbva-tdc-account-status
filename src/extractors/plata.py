@@ -25,8 +25,7 @@ def get_metadata_pdf(pages_text):
         
         if clabe != "CLABE_Unknown" and fecha_corte != "Date_Unknown":
             break
-
-        return clabe, fecha_corte
+    return clabe, fecha_corte
 
 # function to extract msi records
 def extract_msi_rec(pages_text):
