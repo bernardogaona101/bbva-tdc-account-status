@@ -1,6 +1,5 @@
 import os
 import gspread
-import streamlit as st
 import json
 from src.config import BASE_ROOT_FILES, GOOGLE_CREDENTIALS_PATH
 
@@ -36,7 +35,7 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     print("\nIniciando conexión con Google Sheets...")
     
     # Definir la ruta de tus credenciales
-       
+    import streamlit as st
     try:
         if "GOOGLE_CREDENTIALS" in st.secrets:
             # Si estamos en Streamlit Cloud, cargamos el JSON desde los secretos
