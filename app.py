@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 
-# Importamos tus módulos de la carpeta src/
+# Importamos módulos
 from src.router import detect_bank_and_extract
 from src.transform import consolidate_movements, clean_and_categorize
 from src.load import load_data
@@ -13,27 +13,28 @@ from src.config import DEFAULT_GOOGLE_SHEET_NAME
 load_dotenv()
 try:
     # Intenta leerlo de la nube (Streamlit Cloud)
-    env_password = st.secrets["RFC_BBVA"]
+    env_password = st.secrets["RFC"]
 except:
-    # Si falla, intenta leerlo de tu computadora local (.env)
-    env_password = os.getenv("RFC_BBVA", "")
+    # Si falla, intenta leerlo local (.env)
+    env_password = os.getenv("RFC", "")
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(page_title="Analizador Financiero", page_icon="📊", layout="centered")
+# CONFIGURACIÓN DE LA PÁGINA
+st.set_page_config(page_title="Analizador Financiero TDC", page_icon="📠", layout="centered")
 
-st.title("📊 Analizador de Estados de Cuenta")
-st.write("Sube tu estado de cuenta en formato PDF para extraer y analizar tus movimientos de BBVA o Plata Card.")
+st.title("Analizador de Estados de Cuenta",text_alignment="center")
+st.write(" Subir Estado de cuenta en formato PDF para extraer los movimientos.")
+st.write("Por el momento solo Usar bancos BBVA y Plata.")
 
 # --- INICIALIZAR MEMORIA DE SESIÓN ---
 if "datos_procesados" not in st.session_state:
     st.session_state["datos_procesados"] = None
 
-# 2. INTERFAZ DE USUARIO
+# INTERFAZ DE USUARIO
 # Subida de archivo
-pdf_file = st.file_uploader("Selecciona tu PDF", type=["pdf"])
+pdf_file = st.file_uploader("Seleccionar PDF", type=["pdf"])
 
 # Contraseña (con valor por defecto del .env)
-user_password = st.text_input("Contraseña (RFC) - Déjalo en blanco si No se necesita:", 
+user_password = st.text_input("Contraseña (RFC) - Dejar en blanco si el Estado de Cuenta no lo requiere:", 
                               type="password")
 
 # Preferencias de guardado
@@ -42,10 +43,10 @@ col1, col2 = st.columns(2)
 with col1:
     save_local = st.checkbox("Guardar copia local (CSV)", value=False)
 with col2:
-    save_cloud = st.checkbox("Subir a Nube", value=False)
+    save_cloud = st.checkbox("Subir a Nube\n (Acceso limitado)", value=False)
 
 
-# 3. ORQUESTADOR ETL (Se ejecuta al presionar el botón)
+# ORQUESTADOR ETL (Se ejecuta al presionar el botón)
 if st.button("Procesar Estado de Cuenta", type="primary"):
     if pdf_file is None:
         st.warning("⚠️ Por favor, sube un archivo PDF primero.")
@@ -111,9 +112,17 @@ if st.session_state["datos_procesados"] is not None:
     bank = datos["bank"]
     clabe = datos["clabe"]
     fecha = datos["fecha"]
-    
+
+    pago_periodo = df_clean['Monto'].loc[df_clean['Tipo_Movimiento'].isin(['MSI','REGULAR'])].sum()
+    mayores_gastos = []
+
+    top_3 = df_clean[['Categoria']].value_counts().head(3).to_string()
+
     st.markdown("---")
     st.subheader(f"📋 Movimientos Extraidos - {bank} ({fecha})")
+    st.text(f"Cuota a pagar en periodo: ${pago_periodo}")
+    st.text("Top 3 mayores gatos fueron en:")
+    st.text(f"{top_3}")
     st.dataframe(df_clean)
     
     # Botón para descargar archivo CSV
@@ -126,7 +135,7 @@ if st.session_state["datos_procesados"] is not None:
     )
 
     # Botón para decidir subir a Google Sheets DESPUÉS de haber visto los datos
-    if st.button("☁️ Subir esta información a Drive ahora"):
+    if st.button("☁️ Subir esta información a Drive ahora (Limitado)"):
         cuenta_autorizada = ""
         try:
             cuenta_autorizada = st.secrets.get("MI_CLABE", [])
