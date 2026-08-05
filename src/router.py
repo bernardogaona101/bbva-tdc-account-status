@@ -32,9 +32,9 @@ def detect_bank_and_extract(pdf_path, pdf_password):
     bank = "Unknown"
 
     # check if is 'plata card'
-    text_pag_1 = pages_text[1]
+    text_pag_1 = pages_text[1].lower()
     try:
-        if "Plata Card" in text_pag_1 or "plata" in text_pag_1 or "Plata" in text_pag_1:
+        if "plata Card" in text_pag_1 or "plata" in text_pag_1:
             bank = "PLATA"
                 #return bank
     except Exception:
@@ -42,8 +42,8 @@ def detect_bank_and_extract(pdf_path, pdf_password):
 
     if bank == "Unknown":
         try:              
-            text_pag_1 = pages_text[0]
-            if "BBVA" in text_pag_1 or "bbva" in text_pag_1:
+            text_pag_1 = pages_text[0].lower()
+            if "bbva" in text_pag_1:
                 bank = "BBVA"
         except Exception as e:
             print(f"error: {e}")

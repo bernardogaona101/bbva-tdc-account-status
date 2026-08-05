@@ -114,16 +114,24 @@ if st.session_state["datos_procesados"] is not None:
     fecha = datos["fecha"]
 
     pago_periodo = df_clean['Monto'].loc[df_clean['Tipo_Movimiento'].isin(['MSI','REGULAR'])].sum()
-    mayores_gastos = []
 
-    top_3 = df_clean[['Categoria']].value_counts().head(3).to_string()
+    resumen_monto = df_clean.loc[df_clean['Tipo_Movimiento'].isin(['MSI','REGULAR'])].groupby("Categoria")['Monto'].sum().sort_values(ascending=False)
+    summary = resumen_monto.reset_index()
+    summary['Porcentaje (%)'] = round((summary['Monto'] / summary['Monto'].sum()) * 100,2)
+
+
 
     st.markdown("---")
     st.subheader(f"📋 Movimientos Extraidos - {bank} ({fecha})")
     st.text(f"Cuota a pagar en periodo: ${pago_periodo}")
-    st.text("Top 3 mayores gatos fueron en:")
-    st.text(f"{top_3}")
+    st.subheader("📊 Gastos por Categoría")
+    # Streamlit toma automáticamente la columna 'Categoria' para el eje X y 'Monto' para el eje Y
+    st.bar_chart(data=summary, x="Categoria", y="Monto", horizontal=True, sort='-Monto')
+    st.subheader("📊 Gastos en el periodo")
+    # Streamlit toma automáticamente la columna 'Categoria' para el eje X y 'Monto' para el eje Y
+    st.bar_chart(data=df_clean, x="Fecha_Operacion", y="Monto")
     st.dataframe(df_clean)
+
     
     # Botón para descargar archivo CSV
     csv = df_clean.to_csv(index=False, encoding='utf-8-sig').encode('utf-8-sig')
