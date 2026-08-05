@@ -129,7 +129,7 @@ if st.session_state["datos_procesados"] is not None:
     st.bar_chart(data=summary, x="Categoria", y="Monto", horizontal=True, sort='-Monto')
     st.subheader("📊 Gastos en el periodo")
     # Streamlit toma automáticamente la columna 'Categoria' para el eje X y 'Monto' para el eje Y
-    st.bar_chart(data=df_clean, x="Fecha_Operacion", y="Monto")
+    st.bar_chart(data=df_clean.loc[df_clean["Tipo_Movimiento"].isin(["MSI","REGULAR"])], x="Fecha_Operacion", y="Monto")
     st.dataframe(df_clean)
 
     
