@@ -2,6 +2,26 @@ from datetime import datetime
 import pandas as pd
 from src.utils import clean_global_date
 
+# asignar una catergoria
+def assign_category(descripcion):
+
+    desc = str(descripcion).lower()
+
+    categories = {
+        'Comida': ['oxxo', 'oxx','eats','sultana', 'pizza', 'wendy', 'wendy s', 'yogu', 'heb', 'soriana', '7 eleven', 'coffe', 'cafe', 'pollo', 'chila', 'chil', 'walmart', 'wal mart', 'pastel', 'lety', 'food', 'snack', 'rest', 'starbu', 'dominos', 'nuevo mundo'],
+        'Compra en linea': ['mercado pago','aliexpress', 'amazon', 'plaza', 'temu', 'miniso', 'aliex'],
+        'Entretenimiento': ['sultanes','cine', 'cinepolis'],
+        'Salud': ['farm', 'farm guad','f ahorro', 'benavides'],
+        'Telefono': ['telcel', 'str*telcel', 'recargas'],
+        'Transporte': ['uber', 'ride','didi', 'dlo*', 'stripe','lime', 'urbani']
+    }
+
+    for category, keywords in categories.items():
+        if any(keyword in desc for keyword in keywords):
+            return category
+
+    return 'Otros'
+
 # function to concat tables
 def consolidate_movements(df_msi, df_regular):
     # prepare MSI for union
@@ -78,5 +98,7 @@ def clean_and_categorize(bank, df_total, fecha_corte):
     df_total['Fecha_Corte'] = fecha_corte
     
     df_total['bank'] = bank
+
+    df_total['Categoria'] = df_total['Descripcion'].apply(assign_category)
 
     return df_total
