@@ -1,5 +1,13 @@
 import pdfplumber as pp
-import sys
+from src.extractors.bbva import extract_bbva
+from src.extractors.plata import extract_plata
+# extractors
+
+Extractors = {
+    'BBVA': extract_bbva,
+    'PLATA': extract_plata
+}
+
 # extract pdf text
 def extract_pdf_text(pdf_path, pdf_password):
     pages_text = []
@@ -48,16 +56,9 @@ def detect_bank_and_extract(pdf_path, pdf_password):
         except Exception as e:
             print(f"error: {e}")
 
-
-    if bank == "BBVA":
-        from src.extractors.bbva import extract_bbva
-        clabe, fecha, df_msi, df_regular = extract_bbva(pages_text)
-        return bank, clabe, fecha, df_msi, df_regular
-
-    elif bank == "PLATA":
-        from src.extractors.plata import extract_plata
-        clabe, fecha, df_msi, df_regular = extract_plata(pages_text)
-        return bank, clabe, fecha, df_msi, df_regular
+    if bank in Extractors:
+        return bank,*Extractors[bank](pages_text)
     else:
-        print("Bank no detected")
+        import logging
+        logging.error(f"Bank no detected.")
         return None, None, None, None, None 

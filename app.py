@@ -113,7 +113,7 @@ if st.session_state["datos_procesados"] is not None:
     clabe = datos["clabe"]
     fecha = datos["fecha"]
 
-    pago_periodo = df_clean['Monto'].loc[df_clean['Tipo_Movimiento'].isin(['MSI','REGULAR'])].sum()
+    pago_periodo = round(df_clean['Monto'].loc[df_clean['Tipo_Movimiento'].isin(['MSI','REGULAR'])].sum(),2)
 
     resumen_monto = df_clean.loc[df_clean['Tipo_Movimiento'].isin(['MSI','REGULAR'])].groupby("Categoria")['Monto'].sum().sort_values(ascending=False)
     summary = resumen_monto.reset_index()
@@ -146,7 +146,7 @@ if st.session_state["datos_procesados"] is not None:
     if st.button("☁️ Subir esta información a Drive ahora (Limitado)"):
         cuenta_autorizada = ""
         try:
-            cuenta_autorizada = st.secrets.get("MI_CLABE", [])
+            cuenta_autorizada = st.secrets.get("MIS_CLABES", [])
         except:
             pass
 

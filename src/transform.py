@@ -1,25 +1,21 @@
 from datetime import datetime
 import pandas as pd
 from src.utils import clean_global_date
+import json
 
 # asignar una catergoria
-def assign_category(descripcion):
 
-    desc = str(descripcion).lower()
+def cargar_categorias():
+    with open('categories.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-    categories = {
-        'Comida': ['oxxo', 'oxx','eats','sultana', 'pizza', 'wendy', 'wendy s', 'yogu', 'heb', 'soriana', '7 eleven', 'coffe', 'cafe', 'pollo', 'chila', 'chil', 'walmart', 'wal mart', 'pastel', 'lety', 'food', 'snack', 'rest', 'starbu', 'dominos', 'nuevo mundo'],
-        'Compra en linea': ['mercado pago','aliexpress', 'amazon', 'plaza', 'temu', 'miniso', 'aliex'],
-        'Entretenimiento': ['sultanes','cine', 'cinepolis'],
-        'Salud': ['farm', 'farm guad','f ahorro', 'benavides'],
-        'Telefono': ['telcel', 'str*telcel', 'recargas'],
-        'Transporte': ['uber', 'ride','didi', 'dlo*', 'stripe','lime', 'urbani']
-    }
-
-    for category, keywords in categories.items():
-        if any(keyword in desc for keyword in keywords):
-            return category
-
+def assign_category(desc):
+    categorias_dict = cargar_categorias()
+    desc = str(desc).lower()
+    
+    for categoria, palabras_clave in categorias_dict.items():
+        if any(keyword in desc for keyword in palabras_clave):
+            return categoria
     return 'Otros'
 
 # function to concat tables

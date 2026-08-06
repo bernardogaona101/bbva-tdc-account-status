@@ -1,0 +1,8 @@
+{
+    "Comida": ["oxxo", "oxx","eats","sultana", "pizza", "wendy", "wendy s", "yogu", "heb", "soriana", "7 eleven", "coffe", "cafe", "pollo", "chila", "chil", "walmart", "wal mart", "pastel", "lety", "food", "snack", "rest", "starbu", "dominos", "nuevo mundo"],
+    "Compra en linea": ["mercado pago","aliexpress", "amazon", "plaza", "temu", "aliex"],
+    "Entretenimiento": ["sultanes","cine", "cinepolis"],
+    "Salud": ["farm", "farm guad","f ahorro", "benavides"],
+    "Telefono": ["telcel", "str*telcel", "recargas"],
+    "Transporte": ["uber", "ride","didi", "dlo*", "stripe","lime", "urbani"]
+}
