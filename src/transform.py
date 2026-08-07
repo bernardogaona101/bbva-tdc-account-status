@@ -2,7 +2,8 @@ from datetime import datetime
 import pandas as pd
 from src.utils import clean_global_date
 import json
-
+import os
+from src.utils import obtener_mapeo_propietarios
 # asignar una catergoria
 
 def cargar_categorias():
@@ -17,6 +18,23 @@ def assign_category(desc):
         if any(keyword in desc for keyword in palabras_clave):
             return categoria
     return 'Otros'
+
+def obtener_propietario(clabe_o_cuenta: str) -> str:
+    mapeo = obtener_mapeo_propietarios()
+    clabe_buscada = str(clabe_o_cuenta).strip()
+    
+    # Iteramos sobre el diccionario: propietario (llave) -> cuentas (lista de valores)
+    for propietario, cuentas in mapeo.items():
+        if isinstance(cuentas, list):
+            # Limpiamos espacios por seguridad en la lista de cuentas
+            cuentas_limpias = [str(c).strip() for c in cuentas]
+            if clabe_buscada in cuentas_limpias:
+                return propietario
+        # Respaldo por si se configuró una sola cuenta como texto plano en lugar de lista
+        elif str(cuentas).strip() == clabe_buscada:
+            return propietario
+            
+    return "Desconocido"
 
 # function to concat tables
 def consolidate_movements(df_msi, df_regular):
@@ -60,7 +78,7 @@ def consolidate_movements(df_msi, df_regular):
     return df_consolidate
 
 # function to clean and validate records
-def clean_and_categorize(bank, df_total, fecha_corte):
+def clean_and_categorize(bank, df_total, fecha_corte,clabe):
     # cleaning  dates
     df_total['Fecha_Operacion'] = df_total['Fecha_Operacion'].apply(clean_global_date)
     df_total['Fecha_Cargo'] = df_total['Fecha_Cargo'].apply(clean_global_date)
@@ -96,5 +114,7 @@ def clean_and_categorize(bank, df_total, fecha_corte):
     df_total['bank'] = bank
 
     df_total['Categoria'] = df_total['Descripcion'].apply(assign_category)
+
+    df_total['Propietario'] = obtener_propietario(clabe)
 
     return df_total

@@ -36,32 +36,41 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     
     # Definir la ruta de tus credenciales
     import streamlit as st
+    cuenta_servicio = None
+
+    # 1. Intentar autenticar usando los Secrets de Streamlit Cloud (Nube)
     try:
-        if "GOOGLE_CREDENTIALS" in st.secrets:
-            # Si estamos en Streamlit Cloud, cargamos el JSON desde los secretos
+        if hasattr(st, "secrets") and "GOOGLE_CREDENTIALS" in st.secrets:
+            # Si estamos en la nube, cargamos el JSON desde los secretos de Streamlit
             cred_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
             cuenta_servicio = gspread.service_account_from_dict(cred_dict)
-        else:
-            if not os.path.exists(GOOGLE_CREDENTIALS_PATH):
-                # Si estamos en tu computadora local, usamos el archivo fisico
-                print("No se encontraron credenciales")
-                return
+    except Exception:
+        # Silenciamos el error si no hay secretos de Streamlit en local
+        pass
+
+    # 2. Si no estamos en la nube (cuenta_servicio sigue vacío), intentar con el archivo local
+    if cuenta_servicio is None:
+        if not os.path.exists(GOOGLE_CREDENTIALS_PATH):
+            print(f"Error: No se encontraron credenciales en {GOOGLE_CREDENTIALS_PATH} ni en Secrets.")
+            return
+        try:
             cuenta_servicio = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
-        
+        except Exception as e:
+            print(f"Error al autenticar localmente con Google: {e}")
+            return
+
+    # 3. Proceder con el guardado en la pestaña correspondiente de Google Sheets
+    try:
         # Abrir el documento por su nombre (el que compartiste con el robot)
         hoja_maestra = cuenta_servicio.open(nombre_documento)
-        pestana_activa = hoja_maestra.sheet1 # Selecciona la primera pestaña
-        
+        pestana_activa = hoja_maestra.sheet1  # Selecciona la primera pestaña
+
         # Preparar los datos (Gspread necesita una lista de listas, no un DataFrame)
-        # Convertimos NaN a strings vacíos
-        df_limpio = df.fillna('') 
-        # Convertimos los datos a una lista de listas
+        df_limpio = df.fillna('')
         valores_a_subir = df_limpio.values.tolist()
-        
-        # 5. Agregar los datos al final de la hoja (Append)
-        # Esto es clave para Looker Studio: ir apilando meses sin borrar lo anterior
+
+        # Agregar los datos al final de la hoja (Append)
         pestana_activa.append_rows(valores_a_subir)
-        
         print(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}' en la nube.")
         
     except gspread.exceptions.SpreadsheetNotFound:

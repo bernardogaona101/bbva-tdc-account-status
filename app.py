@@ -7,6 +7,7 @@ from src.router import detect_bank_and_extract
 from src.transform import consolidate_movements, clean_and_categorize
 from src.load import load_data
 from src.config import DEFAULT_GOOGLE_SHEET_NAME
+from src.transform import obtener_propietario
 
 # Cargar contraseña oculta desde el archivo .env
 
@@ -66,7 +67,7 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 st.toast("🧹 Limpiando y categorizando movimientos...", icon="⚙️")
                 df_raw = consolidate_movements(df_msi, df_regular)
                 # categorize and clean
-                df_clean = clean_and_categorize(bank,df_raw, fecha)
+                df_clean = clean_and_categorize(bank,df_raw, fecha,clabe)
 
                 #   Guardar en la memoria
                 st.session_state["datos_procesados"] = {
@@ -77,16 +78,14 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 }
             
                 # --- FASE 3: LOAD ---
-                cuentas_autorizadas = ""
-                try:
-                    cuentas_autorizadas = st.secrets.get("MIS_CLABES", [])
-                except:
-                    pass
-                if save_cloud and len(cuentas_autorizadas) > 0:
-                    if clabe not in cuentas_autorizadas:
-                        st.warning("🛡️ Por seguridad, la subida a Google Sheets ha sido desactivada porque el PDF no pertenece a la cuenta administradora. Solo podrás descargar el CSV.")
-                        save_cloud = False
-
+                propietario_actual = obtener_propietario(clabe)
+                if propietario_actual == "Desconocido":
+                    st.error("🚨 Acceso denegado: Esta cuenta no está registrada en el sistema de seguridad.")
+                    save_cloud = False
+                    # Detenemos el flujo de carga a Google Sheets
+                else:
+                    st.success(f"✅ Estado de cuenta validado exitosamente para: {propietario_actual}")
+                    
                 st.toast("💾 Preparando para guardar...", icon="📦")
                 
                 if save_local or save_cloud:

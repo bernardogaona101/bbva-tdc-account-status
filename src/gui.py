@@ -4,6 +4,7 @@ import sys
 import os
 from dotenv import load_dotenv
 
+
 def get_user_data():
 
         load_dotenv()
