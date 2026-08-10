@@ -52,7 +52,7 @@ def obtener_mapeo_propietarios() -> dict:
             
             # Si Streamlit (en la nube) ya lo parseó como diccionario/TOML automáticamente
             if isinstance(secret_val, dict) or hasattr(secret_val, "keys"):
-                return {str(k).strip(): str(v).strip() for k, v in secret_val.items()}
+                return {str(k).strip(): v for k, v in secret_val.items()}
             
             # Por si acaso se configuró como un string JSON en los secretos
             elif isinstance(secret_val, str):

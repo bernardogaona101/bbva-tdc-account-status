@@ -21,18 +21,21 @@ def assign_category(desc):
 
 def obtener_propietario(clabe_o_cuenta: str) -> str:
     mapeo = obtener_mapeo_propietarios()
-    clabe_buscada = str(clabe_o_cuenta).strip()
+    clabe_buscada = str(clabe_o_cuenta).strip().replace("'", "").replace('"', '')
     
     # Iteramos sobre el diccionario: propietario (llave) -> cuentas (lista de valores)
     for propietario, cuentas in mapeo.items():
         if isinstance(cuentas, list):
             # Limpiamos espacios por seguridad en la lista de cuentas
-            cuentas_limpias = [str(c).strip() for c in cuentas]
+            cuentas_limpias = [str(c).strip().replace("'", "").replace('"', '') for c in cuentas]
             if clabe_buscada in cuentas_limpias:
                 return propietario
         # Respaldo por si se configuró una sola cuenta como texto plano en lugar de lista
-        elif str(cuentas).strip() == clabe_buscada:
-            return propietario
+        else:
+            # Respaldo si no es una lista
+            cuenta_str = str(cuentas).strip().replace("'", "").replace('"', '')
+            if cuenta_str == clabe_buscada:
+                return propietario
             
     return "Desconocido"
 
