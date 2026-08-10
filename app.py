@@ -148,7 +148,12 @@ if st.session_state["datos_procesados"] is not None:
             
             # Validamos el resultado de la función
             subida_exitosa = load_data(
-                df_clean, clabe, fecha, google_sheet=DEFAULT_GOOGLE_SHEET_NAME, save_local=False, save_cloud=True
+                df_clean, 
+                clabe, 
+                fecha, 
+                google_sheet=DEFAULT_GOOGLE_SHEET_NAME, 
+                save_local=False, 
+                save_cloud=True
             )
             
             if subida_exitosa:

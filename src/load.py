@@ -52,6 +52,10 @@ def save_to_google_sheets(df, nombre_documento="Master"):
             else:
                 cred_dict = raw_creds
                 
+            # Reemplaza barras invertidas dobles \\n por saltos de línea reales \n
+            if "private_key" in cred_dict and isinstance(cred_dict["private_key"], str):
+                cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+                
             cuenta_servicio = gspread.service_account_from_dict(cred_dict)
     except Exception as e:
         print(f"Advertencia al procesar secrets de Streamlit: {e}")
