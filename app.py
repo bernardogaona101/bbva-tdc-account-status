@@ -22,6 +22,9 @@ except:
 # CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(page_title="Analizador Financiero TDC", page_icon="📠", layout="centered")
 
+# -- LÍNEAS TEMPORALES PARA DEBUG --
+st.write("Llaves detectadas en Secrets:", st.secrets.keys() if hasattr(st.secrets, 'keys') else "No hay secretos")
+
 st.title("Analizador de Estados de Cuenta",text_alignment="center")
 st.write(" Subir Estado de cuenta en formato PDF para extraer los movimientos.")
 st.write("Por el momento solo Usar bancos BBVA y Plata.")
