@@ -1,24 +1,20 @@
 import os
 import gspread
 import json
+import streamlit as st
 from src.config import BASE_ROOT_FILES, GOOGLE_CREDENTIALS_PATH
 
 # save data
 def save_csv(df, clabe, fecha_corte):
-    # root
-    # BASE_ROOT_FILES = os.path.join(os.path.expanduser("~"), "Estados_Cuenta_Analizados")
-    
     # Crear la carpeta si no existe
     if not os.path.exists(BASE_ROOT_FILES):
         os.makedirs(BASE_ROOT_FILES)
         print(f"Carpeta creada en: {BASE_ROOT_FILES}")
 
-
     nombre_archivo = f"{clabe}_{fecha_corte}.csv"
-
     # Construir la ruta completa del archivo
     ruta_completa = os.path.join(BASE_ROOT_FILES, nombre_archivo)
-    
+
     # Guardar el DataFrame
     try:
         # encoding='utf-8-sig' asegura que los acentos se lean bien en Excel
@@ -29,11 +25,9 @@ def save_csv(df, clabe, fecha_corte):
 
 def save_to_google_sheets(df, nombre_documento="Master"):
     """
-    Se conecta a Google Sheets usando el archivo JSON de credenciales
-    y agrega las nuevas filas del DataFrame al final del documento.
+    Se conecta a Google Sheets resolviendo de forma segura formatos TOML y JSON.
     """
     print("\nIniciando conexión con Google Sheets...")
-    import streamlit as st
     cuenta_servicio = None
 
     # 1. Intentar autenticar usando los Secrets de Streamlit Cloud (Nube)
@@ -56,10 +50,8 @@ def save_to_google_sheets(df, nombre_documento="Master"):
                 
             cuenta_servicio = gspread.service_account_from_dict(cred_dict)
             print("Autenticación exitosa con los Secrets de la nube.")
-            
     except Exception as e:
-        # ¡ESTO ES CLAVE! Nos mostrará el error real en tu navegador en lugar de ocultarlo
-        st.error(f"⚠️ Error interno al procesar GOOGLE_CREDENTIALS en los Secrets: {e}")
+        print(f"Advertencia al procesar secrets de Streamlit: {e}")
 
     # 2. Si no estamos en la nube, intentar con el archivo local
     if cuenta_servicio is None:
@@ -75,12 +67,13 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     # 3. Proceder con el guardado
     try:
         hoja_maestra = cuenta_servicio.open(nombre_documento)
-        pestana_activa = hoja_maestra.sheet1
+        pestana_activa = hoja_maestra.sheet1  # Selecciona la primera pestaña
 
+        # Preparar los datos (Gspread necesita una lista de listas, no un DataFrame)
         df_limpio = df.fillna('')
         valores_a_subir = df_limpio.values.tolist()
 
-        # Append de los datos
+        # Agregar los datos al final de la hoja (Append)
         pestana_activa.append_rows(valores_a_subir)
         print(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}'.")
         return True
@@ -91,17 +84,15 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     except Exception as e:
         st.error(f"❌ Error crítico al subir a Google Sheets: {e}")
         return False
-        
-def load_data(df, clabe,fecha_corte, google_sheet="Master", save_local=True, save_cloud=True):
-    """
-    Función orquestadora: Guarda localmente y/o en la nube.
-    Retorna True solo si los destinos solicitados se guardaron correctamente.
-    """
-    exito_local = True
-    exito_nube = True
 
+def load_data(df, clabe, fecha_corte, google_sheet="Master", save_local=True, save_cloud=True):
+    """
+    Función orquestadora de carga: Guarda localmente Y en la nube.
+    """
     if save_local:
-        exito_local = save_csv(df, clabe, fecha_corte)
+        save_csv(df, clabe, fecha_corte)
+    else:
+        print("No saved to local")
 
     if save_cloud:
         df_cloud = df.copy()
@@ -109,6 +100,6 @@ def load_data(df, clabe,fecha_corte, google_sheet="Master", save_local=True, sav
         df_cloud['Fecha_Cargo'] = df_cloud['Fecha_Cargo'].astype(str)
         df_cloud['Fecha_Corte'] = df_cloud['Fecha_Corte'].astype(str)
         df_cloud = df_cloud.fillna("")
-        exito_nube = save_to_google_sheets(df_cloud, google_sheet)
-    
-    return exito_local and exito_nube
+        save_to_google_sheets(df_cloud, google_sheet)
+    else:
+        print("No saved to cloud")
