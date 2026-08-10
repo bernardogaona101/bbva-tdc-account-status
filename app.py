@@ -162,7 +162,7 @@ if st.session_state["datos_procesados"] is not None:
                 st.session_state["subida_exitosa"] = True
                 st.toast(f"¡Datos de {propietario_actual} subidos con éxito! 🎉", icon="☁️")
 
-# Muestra el mensaje de éxito persistente fuera del botón si la subida fue exitosa
-if st.session_state["subida_exitosa"]:
-    propietario_actual = obtener_propietario(clabe)
-    st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
+    # Muestra el mensaje de éxito persistente fuera del botón si la subida fue exitosa
+    if st.session_state["subida_exitosa"]:
+        propietario_actual = obtener_propietario(clabe)
+        st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
