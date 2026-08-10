@@ -42,7 +42,7 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     try:
         if hasattr(st, "secrets") and "GOOGLE_CREDENTIALS" in st.secrets:
             raw_creds = st.secrets["GOOGLE_CREDENTIALS"]
-            
+            logging(raw_creds)
             # Si Streamlit ya lo parseó como un diccionario (TOML) automáticamente
             if isinstance(raw_creds, dict) or hasattr(raw_creds, "keys"):
                 cred_dict = {k: v for k, v in raw_creds.items()}
@@ -78,10 +78,10 @@ def save_to_google_sheets(df, nombre_documento="Master"):
 
         df_limpio = df.fillna('')
         valores_a_subir = df_limpio.values.tolist()
-
+        import logging
         # Append de los datos
         pestana_activa.append_rows(valores_a_subir)
-        print(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}'.")
+        logging.debug(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}'.")
         return True
         
     except gspread.exceptions.SpreadsheetNotFound:
