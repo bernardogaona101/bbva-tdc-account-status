@@ -33,8 +33,6 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     y agrega las nuevas filas del DataFrame al final del documento.
     """
     print("\nIniciando conexión con Google Sheets...")
-    
-    # Definir la ruta de tus credenciales
     import streamlit as st
     cuenta_servicio = None
 
@@ -42,7 +40,7 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     try:
         if hasattr(st, "secrets") and "GOOGLE_CREDENTIALS" in st.secrets:
             raw_creds = st.secrets["GOOGLE_CREDENTIALS"]
-            logging(raw_creds)
+            
             # Si Streamlit ya lo parseó como un diccionario (TOML) automáticamente
             if isinstance(raw_creds, dict) or hasattr(raw_creds, "keys"):
                 cred_dict = {k: v for k, v in raw_creds.items()}
@@ -52,13 +50,16 @@ def save_to_google_sheets(df, nombre_documento="Master"):
             else:
                 cred_dict = raw_creds
                 
-            # Reemplaza barras invertidas dobles \\n por saltos de línea reales \n
+            # Limpieza crítica de saltos de línea para la llave privada de Google
             if "private_key" in cred_dict and isinstance(cred_dict["private_key"], str):
                 cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
                 
             cuenta_servicio = gspread.service_account_from_dict(cred_dict)
+            print("Autenticación exitosa con los Secrets de la nube.")
+            
     except Exception as e:
-        print(f"Advertencia al procesar secrets de Streamlit: {e}")
+        # ¡ESTO ES CLAVE! Nos mostrará el error real en tu navegador en lugar de ocultarlo
+        st.error(f"⚠️ Error interno al procesar GOOGLE_CREDENTIALS en los Secrets: {e}")
 
     # 2. Si no estamos en la nube, intentar con el archivo local
     if cuenta_servicio is None:
@@ -78,19 +79,19 @@ def save_to_google_sheets(df, nombre_documento="Master"):
 
         df_limpio = df.fillna('')
         valores_a_subir = df_limpio.values.tolist()
-        import logging
+
         # Append de los datos
         pestana_activa.append_rows(valores_a_subir)
-        logging.debug(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}'.")
+        print(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}'.")
         return True
         
     except gspread.exceptions.SpreadsheetNotFound:
-        st.error(f"❌ Error: No se encontró el Google Sheet '{nombre_documento}'. ¿Lo compartiste con el correo de servicio: `{cuenta_servicio.client_email if cuenta_servicio else 'desconocido'}`?")
+        st.error(f"❌ Error: No se encontró el Google Sheet '{nombre_documento}'. ¿Lo compartiste con el correo de servicio?")
         return False
     except Exception as e:
         st.error(f"❌ Error crítico al subir a Google Sheets: {e}")
         return False
-
+        
 def load_data(df, clabe,fecha_corte, google_sheet="Master", save_local=True, save_cloud=True):
     """
     Función orquestadora: Guarda localmente y/o en la nube.
