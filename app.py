@@ -22,9 +22,6 @@ except:
 # CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(page_title="Analizador Financiero TDC", page_icon="📠", layout="centered")
 
-# -- LÍNEAS TEMPORALES PARA DEBUG --
-st.write("Llaves detectadas en Secrets:", st.secrets.keys() if hasattr(st.secrets, 'keys') else "No hay secretos")
-
 st.title("Analizador de Estados de Cuenta",text_alignment="center")
 st.write(" Subir Estado de cuenta en formato PDF para extraer los movimientos.")
 st.write("Por el momento solo Usar bancos BBVA y Plata.")
@@ -32,6 +29,8 @@ st.write("Por el momento solo Usar bancos BBVA y Plata.")
 # --- INICIALIZAR MEMORIA DE SESIÓN ---
 if "datos_procesados" not in st.session_state:
     st.session_state["datos_procesados"] = None
+if "subida_exitosa" not in st.session_state:
+    st.session_state["subida_exitosa"] = False
 
 # INTERFAZ DE USUARIO
 # Subida de archivo
@@ -55,6 +54,7 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
     if pdf_file is None:
         st.warning("⚠️ Por favor, sube un archivo PDF primero.")
     else:
+        st.session_state["subida_exitosa"] = False
         with st.spinner("Analizando y extrayendo datos..."):
 
 
@@ -158,6 +158,11 @@ if st.session_state["datos_procesados"] is not None:
                 save_local=False, 
                 save_cloud=True
             )
-            
-            if subida_exitosa:
-                st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
+            if subida_correcta:
+                st.session_state["subida_exitosa"] = True
+                st.toast(f"¡Datos de {propietario_actual} subidos con éxito! 🎉", icon="☁️")
+
+# Muestra el mensaje de éxito persistente fuera del botón si la subida fue exitosa
+if st.session_state["subida_exitosa"]:
+    propietario_actual = obtener_propietario(clabe)
+    st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
