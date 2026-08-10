@@ -41,61 +41,69 @@ def save_to_google_sheets(df, nombre_documento="Master"):
     # 1. Intentar autenticar usando los Secrets de Streamlit Cloud (Nube)
     try:
         if hasattr(st, "secrets") and "GOOGLE_CREDENTIALS" in st.secrets:
-            # Si estamos en la nube, cargamos el JSON desde los secretos de Streamlit
-            cred_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+            raw_creds = st.secrets["GOOGLE_CREDENTIALS"]
+            
+            # Si Streamlit ya lo parseó como un diccionario (TOML) automáticamente
+            if isinstance(raw_creds, dict) or hasattr(raw_creds, "keys"):
+                cred_dict = {k: v for k, v in raw_creds.items()}
+            # Si viene como un string JSON largo
+            elif isinstance(raw_creds, str):
+                cred_dict = json.loads(raw_creds)
+            else:
+                cred_dict = raw_creds
+                
             cuenta_servicio = gspread.service_account_from_dict(cred_dict)
-    except Exception:
-        # Silenciamos el error si no hay secretos de Streamlit en local
-        pass
+    except Exception as e:
+        print(f"Advertencia al procesar secrets de Streamlit: {e}")
 
-    # 2. Si no estamos en la nube (cuenta_servicio sigue vacío), intentar con el archivo local
+    # 2. Si no estamos en la nube, intentar con el archivo local
     if cuenta_servicio is None:
         if not os.path.exists(GOOGLE_CREDENTIALS_PATH):
-            print(f"Error: No se encontraron credenciales en {GOOGLE_CREDENTIALS_PATH} ni en Secrets.")
-            return
+            st.error(f"❌ Error: No se encontraron credenciales en '{GOOGLE_CREDENTIALS_PATH}' ni en los Secrets de la nube.")
+            return False
         try:
             cuenta_servicio = gspread.service_account(filename=GOOGLE_CREDENTIALS_PATH)
         except Exception as e:
-            print(f"Error al autenticar localmente con Google: {e}")
-            return
+            st.error(f"❌ Error al autenticar localmente con Google: {e}")
+            return False
 
-    # 3. Proceder con el guardado en la pestaña correspondiente de Google Sheets
+    # 3. Proceder con el guardado
     try:
-        # Abrir el documento por su nombre (el que compartiste con el robot)
         hoja_maestra = cuenta_servicio.open(nombre_documento)
-        pestana_activa = hoja_maestra.sheet1  # Selecciona la primera pestaña
+        pestana_activa = hoja_maestra.sheet1
 
-        # Preparar los datos (Gspread necesita una lista de listas, no un DataFrame)
         df_limpio = df.fillna('')
         valores_a_subir = df_limpio.values.tolist()
 
-        # Agregar los datos al final de la hoja (Append)
+        # Append de los datos
         pestana_activa.append_rows(valores_a_subir)
-        print(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}' en la nube.")
+        print(f"¡Éxito! Se agregaron {len(valores_a_subir)} filas a '{nombre_documento}'.")
+        return True
         
     except gspread.exceptions.SpreadsheetNotFound:
-        print(f"Error: No se encontró el Google Sheet llamado '{nombre_documento}'. ¿Lo compartiste con el correo de servicio?")
+        st.error(f"❌ Error: No se encontró el Google Sheet '{nombre_documento}'. ¿Lo compartiste con el correo de servicio: `{cuenta_servicio.client_email if cuenta_servicio else 'desconocido'}`?")
+        return False
     except Exception as e:
-        print(f"Error al subir a Google Sheets: {e}")
+        st.error(f"❌ Error crítico al subir a Google Sheets: {e}")
+        return False
 
 def load_data(df, clabe,fecha_corte, google_sheet="Master", save_local=True, save_cloud=True):
     """
-    Función orquestadora de carga: Guarda localmente Y en la nube.
-    Esta es la función que deberás llamar desde main.py
+    Función orquestadora: Guarda localmente y/o en la nube.
+    Retorna True solo si los destinos solicitados se guardaron correctamente.
     """
+    exito_local = True
+    exito_nube = True
+
     if save_local:
-        #   Guardado Local
-        save_csv(df, clabe,fecha_corte)
-    else:
-        print("No saved to local")
+        exito_local = save_csv(df, clabe, fecha_corte)
 
     if save_cloud:
-        #   Guardado en Nube
         df_cloud = df.copy()
         df_cloud['Fecha_Operacion'] = df_cloud['Fecha_Operacion'].astype(str)
         df_cloud['Fecha_Cargo'] = df_cloud['Fecha_Cargo'].astype(str)
         df_cloud['Fecha_Corte'] = df_cloud['Fecha_Corte'].astype(str)
         df_cloud = df_cloud.fillna("")
-        save_to_google_sheets(df_cloud, google_sheet)
-    else:
-        print("No saved to cloud")
+        exito_nube = save_to_google_sheets(df_cloud, google_sheet)
+    
+    return exito_local and exito_nube

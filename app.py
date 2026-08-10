@@ -89,16 +89,13 @@ if st.button("Procesar Estado de Cuenta", type="primary"):
                 st.toast("💾 Preparando para guardar...", icon="📦")
                 
                 if save_local or save_cloud:
-                    load_data(
-                        df_clean,
-                        clabe,
-                        fecha,
-                        google_sheet=DEFAULT_GOOGLE_SHEET_NAME,
-                        save_local=save_local,
-                        save_cloud=save_cloud
+                    # Capturamos si la carga fue realmente exitosa
+                    guardado_correcto = load_data(
+                        df_clean, clabe, fecha, google_sheet=DEFAULT_GOOGLE_SHEET_NAME, save_local=save_local, save_cloud=save_cloud
                     )
-                    st.toast("🚀 ¡Datos guardados exitosamente!", icon="🎉")
-                    st.success("✅ ¡Proceso completado exitosamente!")
+                    if guardado_correcto:
+                        st.toast("🚀 ¡Datos guardados exitosamente!", icon="🎉")
+                        st.success("✅ ¡Proceso completado exitosamente!")
                 else:
                     st.info("ℹ️ Datos extraídos correctamente. Puedes revisarlos en la tabla de abajo antes de decidir guardarlos.")
             else:
@@ -144,16 +141,15 @@ if st.session_state["datos_procesados"] is not None:
     # Botón para decidir subir a Google Sheets DESPUÉS de haber visto los datos
     if st.button("☁️ Subir esta información a Drive ahora (Limitado)"):
         propietario_actual = obtener_propietario(clabe)
-    
         if propietario_actual == "Desconocido":
             st.error("🚨 Acceso denegado: Esta cuenta no está registrada en el sistema de seguridad.")
-            save_cloud=False
         else:
             st.info(f"Conectando para subir los datos de {propietario_actual}...")
-            load_data(
-                df_clean, clabe, fecha, 
-                google_sheet=DEFAULT_GOOGLE_SHEET_NAME, 
-                save_local=False, 
-                save_cloud=True
+            
+            # Validamos el resultado de la función
+            subida_exitosa = load_data(
+                df_clean, clabe, fecha, google_sheet=DEFAULT_GOOGLE_SHEET_NAME, save_local=False, save_cloud=True
             )
-            st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
+            
+            if subida_exitosa:
+                st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
