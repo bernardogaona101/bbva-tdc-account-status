@@ -143,24 +143,17 @@ if st.session_state["datos_procesados"] is not None:
 
     # Botón para decidir subir a Google Sheets DESPUÉS de haber visto los datos
     if st.button("☁️ Subir esta información a Drive ahora (Limitado)"):
-        cuenta_autorizada = ""
-        try:
-            cuenta_autorizada = st.secrets.get("MIS_CLABES", [])
-        except:
-            pass
-
-        permitir_subida = True
-        if len(cuenta_autorizada) > 0 and clabe not in cuenta_autorizada:
-            st.warning("Por seguridad, la subida a Google Sheets no está autorizada para esta cuenta.")
-            permitir_subida = False
-
-        if permitir_subida:
+        propietario_actual = obtener_propietario(clabe)
+    
+        if propietario_actual == "Desconocido":
+            st.error("🚨 Acceso denegado: Esta cuenta no está registrada en el sistema de seguridad.")
+            save_cloud=False
+        else:
+            st.info(f"Conectando para subir los datos de {propietario_actual}...")
             load_data(
-                df_clean,
-                clabe,
-                fecha,
-                google_sheet=DEFAULT_GOOGLE_SHEET_NAME,
-                save_local=False,
+                df_clean, clabe, fecha, 
+                google_sheet=DEFAULT_GOOGLE_SHEET_NAME, 
+                save_local=False, 
                 save_cloud=True
             )
-            st.success("¡Datos subidos exitosamente a la nube!")
+            st.success(f"¡Datos de {propietario_actual} subidos exitosamente a la nube! 🎉")
