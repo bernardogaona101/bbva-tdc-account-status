@@ -4,5 +4,5 @@
     "Entretenimiento": ["sultanes","cine", "cinepolis"],
     "Salud": ["farm", "farm guad","f ahorro", "benavides"],
     "Telefono": ["telcel", "str*telcel", "recargas"],
-    "Transporte": ["uber", "ride","didi", "dlo*", "stripe","lime", "urbani"]
+    "Transporte": ["uber", "ride","didi", "dlo*", "stripe","lime", "urbani", "recarga"]
 }
